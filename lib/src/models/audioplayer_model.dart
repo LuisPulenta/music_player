@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 class AudioPlayerModel with ChangeNotifier {
   bool _playing = false;
-  Duration _songDuration = Duration(milliseconds: 0);
-  Duration _current = Duration(milliseconds: 0);
+  Duration _songDuration = new Duration(milliseconds: 0);
+  Duration _current = new Duration(milliseconds: 0);
 
   String get songTotalDuration => this.printDuration(this._songDuration);
   String get currentSecond => this.printDuration(this._current);
 
-  double get porcentaje => _songDuration.inSeconds == 0
-      ? 0
-      : this._current.inSeconds / this._songDuration.inSeconds;
+  double get porcentaje => (this._songDuration.inSeconds > 0)
+      ? this._current.inSeconds / this._songDuration.inSeconds
+      : 0;
 
   late AnimationController _controller;
   set controller(AnimationController valor) {
@@ -45,6 +45,7 @@ class AudioPlayerModel with ChangeNotifier {
 
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    // return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
     return "$twoDigitMinutes:$twoDigitSeconds";
   }
 }
