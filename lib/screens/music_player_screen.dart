@@ -246,7 +246,7 @@ class BarraProgreso extends StatelessWidget {
             bottom: 0,
             child: Container(
                 width: 3,
-                height: 230 * porcentaje,
+                height: 231 * porcentaje,
                 color: Colors.white.withOpacity(0.8)),
           ),
         ],
