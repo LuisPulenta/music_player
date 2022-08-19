@@ -116,8 +116,6 @@ class _TituloPlayState extends State<TituloPlay>
   void open() {
     final audioPlayerModel =
         Provider.of<AudioPlayerModel>(context, listen: false);
-
-    //! assetAudioPlayer.open('assets/Breaking-Benjamin-Far-Away.mp3');
     assetAudioPlayer.open(Audio('assets/Bohemian Rhapsody.mp3'),
         autoStart: true, showNotification: true);
 
@@ -126,7 +124,6 @@ class _TituloPlayState extends State<TituloPlay>
     });
 
     assetAudioPlayer.current.listen((playingAudio) {
-      //! audioPlayerModel.songDuration = playingAudio.duration;
       audioPlayerModel.songDuration =
           playingAudio?.audio.duration ?? const Duration(seconds: 0);
     });
@@ -183,7 +180,7 @@ class _TituloPlayState extends State<TituloPlay>
               }
 
               if (firsTime) {
-                this.open();
+                open();
                 firsTime = false;
               } else {
                 assetAudioPlayer.playOrPause();
@@ -231,7 +228,7 @@ class BarraProgreso extends StatelessWidget {
     final audioPlayerModel = Provider.of<AudioPlayerModel>(context);
     final porcentaje = audioPlayerModel.porcentaje;
     return Column(children: [
-      Text('${audioPlayerModel.songTotalDuration}', style: estilo),
+      Text(audioPlayerModel.songTotalDuration, style: estilo),
       const SizedBox(
         height: 10,
       ),
@@ -254,7 +251,7 @@ class BarraProgreso extends StatelessWidget {
       const SizedBox(
         height: 10,
       ),
-      Text('${audioPlayerModel.currentSecond}', style: estilo),
+      Text(audioPlayerModel.currentSecond, style: estilo),
     ]);
   }
 }
