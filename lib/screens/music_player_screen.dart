@@ -280,12 +280,12 @@ class ImagenDisco extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             SpinPerfect(
-              duration: Duration(seconds: 5),
+              duration: const Duration(seconds: 5),
               infinite: true,
               manualTrigger: true,
               controller: (animationController) =>
                   audioPlayerModel.controller = animationController,
-              child: Image(
+              child: const Image(
                 image: AssetImage('assets/aurora.jpg'),
               ),
             ),
