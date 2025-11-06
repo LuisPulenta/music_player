@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class AudioPlayerModel with ChangeNotifier {
   bool _playing = false;
   late AnimationController _controller;
-  Duration _songDuration = const Duration(milliseconds: 0);
-  Duration _current = const Duration(milliseconds: 0);
+  Duration _songDuration = Duration(milliseconds: 0);
+  Duration _current = Duration(milliseconds: 0);
   double get porcentaje => (_songDuration.inSeconds > 0)
       ? _current.inSeconds / _songDuration.inSeconds
       : 0;

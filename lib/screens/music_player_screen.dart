@@ -1,13 +1,14 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:assets_audio_player/assets_audio_player.dart';
+// import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:music_player/helpers/helpers.dart';
 import 'package:music_player/models/audioplayer_model.dart';
 import 'package:music_player/widgets/custom_appbar.dart';
 import 'package:provider/provider.dart';
 
 class MusicPlayerScreen extends StatelessWidget {
-  const MusicPlayerScreen({Key? key}) : super(key: key);
+  const MusicPlayerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +21,7 @@ class MusicPlayerScreen extends StatelessWidget {
               CustomAppbar(),
               ImagenDiscoDuracion(),
               TituloPlay(),
-              Expanded(
-                child: Lyrics(),
-              ),
+              Expanded(child: Lyrics()),
             ],
           ),
         ],
@@ -34,6 +33,8 @@ class MusicPlayerScreen extends StatelessWidget {
 //----------------- Background -----------------
 
 class Background extends StatelessWidget {
+  const Background({super.key});
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -43,12 +44,10 @@ class Background extends StatelessWidget {
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(50)),
         gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.center,
-            colors: [
-              Color(0xff33333E),
-              Color(0xff201e28),
-            ]),
+          begin: Alignment.centerLeft,
+          end: Alignment.center,
+          colors: [Color(0xff33333E), Color(0xff201e28)],
+        ),
       ),
     );
   }
@@ -56,7 +55,7 @@ class Background extends StatelessWidget {
 
 //----------------- Lyrics -----------------
 class Lyrics extends StatelessWidget {
-  const Lyrics({Key? key}) : super(key: key);
+  const Lyrics({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +68,10 @@ class Lyrics extends StatelessWidget {
           .map(
             (linea) => Text(
               linea,
-              style:
-                  TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontSize: 14,
+              ),
             ),
           )
           .toList(),
@@ -80,9 +81,7 @@ class Lyrics extends StatelessWidget {
 
 //----------------- TituloPlay -----------------
 class TituloPlay extends StatefulWidget {
-  const TituloPlay({
-    Key? key,
-  }) : super(key: key);
+  const TituloPlay({super.key});
 
   @override
   State<TituloPlay> createState() => _TituloPlayState();
@@ -95,9 +94,10 @@ class _TituloPlayState extends State<TituloPlay>
   bool firsTime = true;
   late AnimationController playAnimation;
 
-  final assetAudioPlayer = AssetsAudioPlayer();
+  // final assetAudioPlayer = AssetsAudioPlayer();
+  final assetAudioPlayer = AudioPlayer();
 
-//----- InitState -----
+  //----- InitState -----
   @override
   void initState() {
     playAnimation = AnimationController(
@@ -107,29 +107,38 @@ class _TituloPlayState extends State<TituloPlay>
     super.initState();
   }
 
+  //----- dispose -----
   @override
   void dispose() {
     playAnimation.dispose();
     super.dispose();
   }
 
-  void open() {
-    final audioPlayerModel =
-        Provider.of<AudioPlayerModel>(context, listen: false);
-    assetAudioPlayer.open(Audio('assets/Bohemian Rhapsody.mp3'),
-        autoStart: true, showNotification: true);
+  //----- open -----
+  void open() async {
+    final audioPlayerModel = Provider.of<AudioPlayerModel>(
+      context,
+      listen: false,
+    );
 
-    assetAudioPlayer.currentPosition.listen((duration) {
+    await assetAudioPlayer.setAsset(
+      'assets/Bohemian Rhapsody.mp3',
+    ); // Ruta de tu archivo MP3
+
+    // Actualiza la posición actual
+    assetAudioPlayer.positionStream.listen((duration) {
       audioPlayerModel.current = duration;
     });
 
-    assetAudioPlayer.current.listen((playingAudio) {
-      audioPlayerModel.songDuration =
-          playingAudio?.audio.duration ?? const Duration(seconds: 0);
+    // Actualiza la duración total de la canción
+    assetAudioPlayer.durationStream.listen((duration) {
+      audioPlayerModel.songDuration = duration ?? Duration.zero;
     });
+
+    assetAudioPlayer.play();
   }
 
-//----- Pantalla -----
+  //----- Pantalla -----
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -142,16 +151,18 @@ class _TituloPlayState extends State<TituloPlay>
               Text(
                 "Bohemian Rhapsody",
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 "-Queen-",
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -161,13 +172,16 @@ class _TituloPlayState extends State<TituloPlay>
             highlightElevation: 0,
             backgroundColor: const Color(0xfff8cb51),
             child: AnimatedIcon(
+              color: Colors.black,
               icon: AnimatedIcons.play_pause,
               size: 40,
               progress: playAnimation,
             ),
             onPressed: () {
-              final audioPlayerModel =
-                  Provider.of<AudioPlayerModel>(context, listen: false);
+              final audioPlayerModel = Provider.of<AudioPlayerModel>(
+                context,
+                listen: false,
+              );
 
               if (isPlaying) {
                 playAnimation.reverse();
@@ -183,19 +197,27 @@ class _TituloPlayState extends State<TituloPlay>
                 open();
                 firsTime = false;
               } else {
-                assetAudioPlayer.playOrPause();
+                playOrPause();
               }
             },
-          )
+          ),
         ],
       ),
     );
+  }
+
+  void playOrPause() {
+    if (assetAudioPlayer.playing) {
+      assetAudioPlayer.pause();
+    } else {
+      assetAudioPlayer.play();
+    }
   }
 }
 
 //----------------- ImagenDiscoDuracion -----------------
 class ImagenDiscoDuracion extends StatelessWidget {
-  const ImagenDiscoDuracion({Key? key}) : super(key: key);
+  const ImagenDiscoDuracion({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -205,13 +227,9 @@ class ImagenDiscoDuracion extends StatelessWidget {
       child: Row(
         children: const [
           ImagenDisco(),
-          SizedBox(
-            width: 40,
-          ),
+          SizedBox(width: 40),
           BarraProgreso(),
-          SizedBox(
-            width: 20,
-          ),
+          SizedBox(width: 20),
         ],
       ),
     );
@@ -220,45 +238,44 @@ class ImagenDiscoDuracion extends StatelessWidget {
 
 //----------------- BarraProgreso -----------------
 class BarraProgreso extends StatelessWidget {
-  const BarraProgreso({Key? key}) : super(key: key);
+  const BarraProgreso({super.key});
 
   @override
   Widget build(BuildContext context) {
     final estilo = TextStyle(color: Colors.white.withOpacity(0.4));
     final audioPlayerModel = Provider.of<AudioPlayerModel>(context);
     final porcentaje = audioPlayerModel.porcentaje;
-    return Column(children: [
-      Text(audioPlayerModel.songTotalDuration, style: estilo),
-      const SizedBox(
-        height: 10,
-      ),
-      Stack(
-        children: [
-          Container(
-            width: 3,
-            height: 230,
-            color: Colors.white.withOpacity(0.1),
-          ),
-          Positioned(
-            bottom: 0,
-            child: Container(
+    return Column(
+      children: [
+        Text(audioPlayerModel.songTotalDuration, style: estilo),
+        const SizedBox(height: 10),
+        Stack(
+          children: [
+            Container(
+              width: 3,
+              height: 230,
+              color: Colors.white.withOpacity(0.1),
+            ),
+            Positioned(
+              bottom: 0,
+              child: Container(
                 width: 3,
                 height: 230 * porcentaje,
-                color: Colors.white.withOpacity(0.8)),
-          ),
-        ],
-      ),
-      const SizedBox(
-        height: 10,
-      ),
-      Text(audioPlayerModel.currentSecond, style: estilo),
-    ]);
+                color: Colors.white.withOpacity(0.8),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(audioPlayerModel.currentSecond, style: estilo),
+      ],
+    );
   }
 }
 
 //----------------- ImagenDisco -----------------
 class ImagenDisco extends StatelessWidget {
-  const ImagenDisco({Key? key}) : super(key: key);
+  const ImagenDisco({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -269,10 +286,10 @@ class ImagenDisco extends StatelessWidget {
       height: 250,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(200),
-        gradient: const LinearGradient(begin: Alignment.topLeft, colors: [
-          Color(0xff484750),
-          Color(0xff1e1c24),
-        ]),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          colors: [Color(0xff484750), Color(0xff1e1c24)],
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(200),
@@ -285,9 +302,7 @@ class ImagenDisco extends StatelessWidget {
               manualTrigger: true,
               controller: (animationController) =>
                   audioPlayerModel.controller = animationController,
-              child: const Image(
-                image: AssetImage('assets/aurora.jpg'),
-              ),
+              child: const Image(image: AssetImage('assets/aurora.jpg')),
             ),
             Container(
               width: 30,
